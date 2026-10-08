@@ -10,11 +10,13 @@ export default function InfoButton({
   id,
   title,
   initial,
+  large = false,
 }: {
   kind: "item" | "section";
   id: number;
   title: string;
   initial?: Info;
+  large?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [info, setInfo] = useState<Info | null>(initial?.text ? initial : null);
@@ -39,9 +41,9 @@ export default function InfoButton({
         type="button"
         onClick={show}
         aria-label={`Erklärung zu ${title}`}
-        className="grid size-7 shrink-0 place-items-center rounded-full text-accent hover:bg-accent/10"
+        className={`grid shrink-0 place-items-center rounded-full text-accent hover:bg-accent/10 ${large ? "size-12 bg-accent/10" : "size-7"}`}
       >
-        <svg viewBox="0 0 20 20" className="size-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <svg viewBox="0 0 20 20" className={large ? "size-6" : "size-[18px]"} fill="none" stroke="currentColor" strokeWidth="1.5">
           <circle cx="10" cy="10" r="8.25" />
           <path d="M10 9v5" strokeLinecap="round" />
           <circle cx="10" cy="6.25" r="0.9" fill="currentColor" stroke="none" />
@@ -55,7 +57,7 @@ export default function InfoButton({
         )}
         {!loading && info?.text && (
           <>
-            <p className="whitespace-pre-line text-[17px] leading-relaxed">{info.text}</p>
+            <p className="whitespace-pre-line text-[19px] leading-relaxed">{info.text}</p>
             {info.source === "ai" && (
               <p className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-chip px-3 py-1 text-[12px] text-muted">
                 <Sparkle /> KI-generierte Erklärung

@@ -3,7 +3,7 @@
 export default function PrintButton() {
   return (
     <button className="btn-secondary" onClick={() => window.print()}>
-      Drucken / PDF
+      Als PDF speichern
     </button>
   );
 }

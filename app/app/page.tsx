@@ -35,24 +35,24 @@ export default async function UserHome() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 pb-24 pt-10 md:px-6 md:pt-16">
-      <p className="eyebrow">{new Intl.DateTimeFormat("de-DE", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Berlin" }).format(new Date())}</p>
-      <h1 className="headline mt-1">Hallo, {user.name.split(" ")[0]}.</h1>
+      <p className="text-[16px] font-semibold uppercase tracking-wide text-muted">{new Intl.DateTimeFormat("de-DE", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Berlin" }).format(new Date())}</p>
+      <h1 className="mt-1 text-[40px] font-bold leading-[1.05] tracking-tight md:text-[56px]">Hallo, {user.name.split(" ")[0]}.</h1>
 
       {def && (
         <section className="card mt-8 overflow-hidden p-7 md:p-10">
-          <p className="eyebrow text-accent">Deine Checkliste</p>
-          <h2 className="mt-2 text-[28px] font-semibold tracking-tight md:text-[40px]">{def.name}</h2>
-          {def.description && <p className="mt-2 max-w-xl text-[17px] text-muted">{def.description}</p>}
-          <p className="mt-2 text-[14px] text-muted">
+          <p className="text-[15px] font-semibold uppercase tracking-wide text-accent">Deine Checkliste</p>
+          <h2 className="mt-2 text-[32px] font-bold leading-tight tracking-tight md:text-[44px]">{def.name}</h2>
+          {def.description && <p className="mt-2 max-w-xl text-[19px] text-muted">{def.description}</p>}
+          <p className="mt-2 text-[16px] text-muted">
             {def.section_count} Abschnitte · {def.item_count} Punkte
           </p>
           <div className="mt-6">
             {defOpen ? (
-              <Link className="btn-primary" href={`/app/run/${defOpen.id}`}>
+              <Link className="btn-primary min-h-16 w-full px-8 text-[20px] sm:w-auto" href={`/app/run/${defOpen.id}`}>
                 Fortsetzen · {defOpen.done}/{defOpen.total}
               </Link>
             ) : (
-              <StartButton checklistId={def.id} label="Jetzt starten" />
+              <StartButton checklistId={def.id} label="Jetzt starten" className="btn-primary min-h-16 w-full px-8 text-[20px] sm:w-auto" />
             )}
           </div>
         </section>
@@ -60,16 +60,16 @@ export default async function UserHome() {
 
       {openRuns.filter((r) => r !== defOpen).length > 0 && (
         <section className="mt-12">
-          <h2 className="text-[24px] font-semibold tracking-tight">In Bearbeitung</h2>
+          <h2 className="text-[28px] font-bold tracking-tight">In Bearbeitung</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {openRuns
               .filter((r) => r !== defOpen)
               .map((r) => (
-                <Link key={r.id} href={`/app/run/${r.id}`} className="card group flex items-center gap-4 p-5 transition hover:scale-[1.01]">
+                <Link key={r.id} href={`/app/run/${r.id}`} className="card group flex min-h-24 items-center gap-4 p-5 transition hover:scale-[1.01]">
                   <Progress done={r.done} total={r.total} />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[17px] font-semibold">{r.name}</div>
-                    <div className="text-[13px] text-muted">
+                    <div className="truncate text-[20px] font-semibold">{r.name}</div>
+                    <div className="text-[15px] text-muted">
                       {r.status === "completed" ? "Wartet auf Unterschrift" : `Zuletzt bearbeitet ${formatDateTime(r.last_activity_at)}`}
                     </div>
                   </div>
@@ -82,20 +82,20 @@ export default async function UserHome() {
 
       {others.length > 0 && (
         <section className="mt-12">
-          <h2 className="text-[24px] font-semibold tracking-tight">{def ? "Weitere Checklisten" : "Checklisten"}</h2>
+          <h2 className="text-[28px] font-bold tracking-tight">{def ? "Weitere Checklisten" : "Checklisten"}</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {others.map((c) => (
               <div key={c.id} className="card flex flex-col p-6">
-                <div className="text-[19px] font-semibold tracking-tight">{c.name}</div>
-                {c.description && <p className="mt-1 line-clamp-3 text-[15px] text-muted">{c.description}</p>}
+                <div className="text-[22px] font-bold tracking-tight">{c.name}</div>
+                {c.description && <p className="mt-1 line-clamp-3 text-[17px] text-muted">{c.description}</p>}
                 <p className="mt-2 text-[13px] text-muted">{c.item_count} Punkte</p>
                 <div className="mt-auto pt-5">
                   {openRuns.some((r) => r.checklist_id === c.id) ? (
-                    <Link className="btn-secondary" href={`/app/run/${openRuns.find((r) => r.checklist_id === c.id)!.id}`}>
+                    <Link className="btn-secondary min-h-14 w-full text-[18px]" href={`/app/run/${openRuns.find((r) => r.checklist_id === c.id)!.id}`}>
                       Fortsetzen
                     </Link>
                   ) : (
-                    <StartButton checklistId={c.id} className="btn-secondary" />
+                    <StartButton checklistId={c.id} className="btn-secondary min-h-14 w-full text-[18px]" />
                   )}
                 </div>
               </div>
@@ -110,12 +110,12 @@ export default async function UserHome() {
 
       {reports.length > 0 && (
         <section className="mt-12">
-          <h2 className="text-[24px] font-semibold tracking-tight">Meine Reports</h2>
+          <h2 className="text-[28px] font-bold tracking-tight">Meine Reports</h2>
           <div className="card mt-4 divide-y divide-line">
             {reports.map((r) => (
-              <Link key={r.id} href={`/reports/${r.id}`} className="flex items-center gap-3 px-5 py-4 hover:bg-chip/50">
+              <Link key={r.id} href={`/reports/${r.id}`} className="flex min-h-20 items-center gap-3 px-5 py-4 hover:bg-chip/50">
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-medium">{r.name}</div>
+                  <div className="truncate text-[19px] font-medium">{r.name}</div>
                   <div className="truncate text-[13px] text-muted">
                     {formatDateTime(r.signed_at)}
                     {r.location_label ? ` · ${r.location_label}` : ""}
@@ -136,12 +136,12 @@ function Progress({ done, total }: { done: number; total: number }) {
   const r = 18;
   const c = 2 * Math.PI * r;
   return (
-    <div className="relative grid size-12 shrink-0 place-items-center">
+    <div className="relative grid size-16 shrink-0 place-items-center">
       <svg viewBox="0 0 44 44" className="absolute inset-0 -rotate-90">
         <circle cx="22" cy="22" r={r} fill="none" stroke="var(--line)" strokeWidth="4" />
-        <circle cx="22" cy="22" r={r} fill="none" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" strokeDasharray={`${c * pct} ${c}`} />
+        <circle cx="22" cy="22" r={r} fill="none" stroke="var(--ok)" strokeWidth="4" strokeLinecap="round" strokeDasharray={`${c * pct} ${c}`} />
       </svg>
-      <span className="text-[11px] font-semibold">{Math.round(pct * 100)}%</span>
+      <span className="text-[14px] font-bold">{Math.round(pct * 100)}%</span>
     </div>
   );
 }
