@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import fs from "node:fs";
 import path from "node:path";
 import { hashPassword } from "./password";
@@ -92,30 +92,68 @@ CREATE INDEX IF NOT EXISTS idx_sections_checklist ON sections(checklist_id);
 CREATE INDEX IF NOT EXISTS idx_items_section ON items(section_id);
 `;
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __checklistDb: Database.Database | undefined;
+type Row = Record<string, unknown>;
+
+/**
+ * Thin wrapper around node:sqlite. Rows are copied into plain objects because node:sqlite returns
+ * null-prototype objects, which React refuses to pass from server to client components.
+ */
+export class Db {
+  constructor(private readonly raw: DatabaseSync) {}
+
+  exec(sql: string) {
+    this.raw.exec(sql);
+  }
+
+  prepare(sql: string) {
+    const stmt = this.raw.prepare(sql);
+    return {
+      run: (...params: SQLInputValue[]) => stmt.run(...params),
+      get: (...params: SQLInputValue[]): Row | undefined => {
+        const row = stmt.get(...params);
+        return row ? { ...row } : undefined;
+      },
+      all: (...params: SQLInputValue[]): Row[] => stmt.all(...params).map((row) => ({ ...row })),
+    };
+  }
 }
 
-function open(): Database.Database {
+declare global {
+  // eslint-disable-next-line no-var
+  var __checklistDb: Db | undefined;
+}
+
+function open(): Db {
   const file = process.env.DATABASE_PATH || path.join(process.cwd(), "data", "checklisten.db");
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  const db = new Database(file);
-  db.pragma("journal_mode = WAL");
-  db.pragma("foreign_keys = ON");
+  const db = new Db(new DatabaseSync(file));
+  db.exec("PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;");
   db.exec(SCHEMA);
   seed(db);
   return db;
 }
 
-export function getDb(): Database.Database {
+export function getDb(): Db {
   if (!globalThis.__checklistDb) globalThis.__checklistDb = open();
   return globalThis.__checklistDb;
 }
 
 export const nowIso = () => new Date().toISOString();
 
-function seed(db: Database.Database) {
+/** Runs fn inside BEGIN/COMMIT, rolling back if it throws. */
+export function transaction<T>(db: Db, fn: () => T): T {
+  db.exec("BEGIN");
+  try {
+    const result = fn();
+    db.exec("COMMIT");
+    return result;
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
+}
+
+function seed(db: Db) {
   const count = (db.prepare("SELECT COUNT(*) AS n FROM users").get() as { n: number }).n;
   if (count > 0) return;
 
@@ -125,7 +163,7 @@ function seed(db: Database.Database) {
     "INSERT INTO users (name, email, password_hash, role, default_checklist_id) VALUES (?, ?, ?, ?, ?)",
   );
 
-  const tx = db.transaction(() => {
+  transaction(db, () => {
     insertUser.run("Administrator", adminEmail, hashPassword(adminPassword), "admin", null);
     if (process.env.SEED_DEMO === "false") return;
 
@@ -178,5 +216,4 @@ function seed(db: Database.Database) {
     });
     insertUser.run("Max Mustermann", "max@example.com", hashPassword("demo"), "user", checklistId);
   });
-  tx();
 }

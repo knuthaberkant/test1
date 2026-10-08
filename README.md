@@ -4,6 +4,8 @@ Konfigurierbares Checklisten-Board für Teams: Admin-Backend zur Pflege der Chec
 
 ## Schnellstart
 
+Voraussetzung: **Node.js 22.13 oder neuer**. Die Datenbank nutzt das in Node eingebaute SQLite, Build-Tools wie Visual Studio sind nicht nötig.
+
 ```bash
 npm install
 cp .env.example .env.local   # ANTHROPIC_API_KEY eintragen
@@ -21,6 +23,7 @@ Dazu eine Beispiel-Checkliste „Baustellenabnahme“ (abschaltbar mit `SEED_DEM
 
 ## Wichtig für den Betrieb
 
+- Beim Start erscheint der Hinweis `ExperimentalWarning: SQLite is an experimental feature`. Er ist harmlos und kommt von Node selbst.
 - **HTTPS ist Pflicht** auf dem Smartphone: Standort und Mikrofon funktionieren in Browsern nur über HTTPS (oder localhost).
 - **Spracheingabe** nutzt die Spracherkennung des Browsers (Safari auf iOS/macOS, Chrome, Edge). Firefox unterstützt sie nicht; dort bleibt die Diktierfunktion der Tastatur.
 - **KI** (Claude API, Modell über `ANTHROPIC_MODEL`, Standard `claude-opus-5-5`): Ohne `ANTHROPIC_API_KEY` läuft die App weiter, zeigt dann keine KI-Erklärungen, übernimmt Sprachnotizen unverändert und erstellt eine einfache automatische Zusammenfassung.
@@ -47,4 +50,4 @@ Unterschriebene Reports speichern eine eingefrorene Kopie der Checkliste, späte
 
 ## Technik
 
-Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · SQLite (better-sqlite3) · Anthropic SDK
+Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · SQLite (node:sqlite, in Node eingebaut) · Anthropic SDK

@@ -1,5 +1,5 @@
 import { apiAdmin, handle, HttpError } from "@/lib/auth";
-import { getDb, nowIso } from "@/lib/db";
+import { getDb, nowIso, transaction } from "@/lib/db";
 import { getChecklist } from "@/lib/data";
 
 type ItemInput = { id?: number | string; title: string; description?: string | null };
@@ -32,7 +32,7 @@ export const PUT = handle(async (request: Request, ctx: { params: Promise<{ id: 
   const keptSections = new Set<number>();
   const keptItems = new Set<number>();
 
-  db.transaction(() => {
+  transaction(db, () => {
     db.prepare("UPDATE checklists SET name = ?, description = ?, active = ?, updated_at = ? WHERE id = ?").run(
       body.name.trim(),
       clean(body.description),
@@ -79,7 +79,7 @@ export const PUT = handle(async (request: Request, ctx: { params: Promise<{ id: 
       if (!keptSections.has(sid)) db.prepare("UPDATE sections SET deleted_at = ? WHERE id = ?").run(now, sid);
     for (const iid of oldItems.keys())
       if (!keptItems.has(iid)) db.prepare("UPDATE items SET deleted_at = ? WHERE id = ?").run(now, iid);
-  })();
+  });
 
   return Response.json(getChecklist(id));
 });
