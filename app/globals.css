@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+:root {
+  --canvas: #f5f5f7;
+  --card: #ffffff;
+  --ink: #1d1d1f;
+  --muted: #6e6e73;
+  --line: rgba(0, 0, 0, 0.08);
+  --accent: #0071e3;
+  --accent-hover: #0077ed;
+  --link: #0066cc;
+  --ok: #34c759;
+  --warn: #ff9f0a;
+  --danger: #ff3b30;
+  --chip: #f5f5f7;
+  --nav: rgba(251, 251, 253, 0.8);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #000000;
+    --card: #1c1c1e;
+    --ink: #f5f5f7;
+    --muted: #a1a1a6;
+    --line: rgba(255, 255, 255, 0.12);
+    --accent: #0a84ff;
+    --accent-hover: #409cff;
+    --link: #2997ff;
+    --ok: #30d158;
+    --warn: #ff9f0a;
+    --danger: #ff453a;
+    --chip: #2c2c2e;
+    --nav: rgba(22, 22, 23, 0.8);
+  }
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-link: var(--link);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-chip: var(--chip);
+  --color-nav: var(--nav);
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+}
+
+@utility btn {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-[15px] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40;
+}
+@utility btn-primary {
+  @apply btn bg-accent text-white hover:bg-accent-hover;
+}
+@utility btn-secondary {
+  @apply btn bg-chip text-ink hover:opacity-80;
+}
+@utility btn-danger {
+  @apply btn bg-chip text-danger hover:opacity-80;
+}
+@utility card {
+  @apply rounded-3xl bg-card shadow-[0_2px_12px_rgba(0,0,0,0.04)];
+}
+@utility input {
+  @apply w-full min-h-11 rounded-xl border border-line bg-card px-4 py-2.5 text-[16px] text-ink outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15;
+}
+@utility label {
+  @apply mb-1.5 block text-[13px] font-medium text-muted;
+}
+@utility eyebrow {
+  @apply text-[13px] font-semibold uppercase tracking-wide text-muted;
+}
+@utility headline {
+  @apply text-[34px] leading-[1.1] font-semibold tracking-tight md:text-[48px];
+}
+@utility link {
+  @apply text-link hover:underline;
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.animate-sheet {
+  animation: sheet-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
