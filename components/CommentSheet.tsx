@@ -144,7 +144,7 @@ export function CommentEditor({
     <div>
       <div className="relative">
         <textarea
-          className={`input resize-none leading-relaxed ${large ? "min-h-32 text-[19px]" : "min-h-36"}`}
+          className={`input comment-field resize-none ${large ? "min-h-36" : "min-h-40"}`}
           placeholder="Kommentar eingeben oder einsprechen …"
           value={recording ? interim || text : text}
           readOnly={recording || processing}

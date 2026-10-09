@@ -122,7 +122,7 @@ export default function RunView({
       <Link href="/app" className="link inline-flex min-h-11 items-center text-[18px]">‹ Übersicht</Link>
       <div className="mt-2 flex items-start gap-4">
         <div className="min-w-0 flex-1">
-          <h1 className="text-[34px] font-bold leading-[1.05] tracking-tight md:text-[48px]">{checklistName}</h1>
+          <h1 className="hyphens-auto text-[34px] font-bold leading-[1.05] tracking-tight [overflow-wrap:anywhere] md:text-[48px]">{checklistName}</h1>
           <p className="mt-2 text-[16px] text-muted">Gestartet {startedText} · wird automatisch gespeichert</p>
         </div>
         <ProgressRing pct={pct} />
@@ -261,15 +261,15 @@ function ListMode({
               className="flex min-h-20 cursor-pointer select-none items-center gap-4 px-5 py-4"
             >
               <span
-                className={`grid size-11 shrink-0 place-items-center rounded-full text-[18px] font-bold ${
-                  complete ? "bg-ok text-white" : "bg-chip text-muted"
+                className={`type relative grid size-11 shrink-0 place-items-center rounded-[6px] border-2 border-[var(--edge)] text-[20px] font-bold ${
+                  complete ? "bg-card" : "bg-chip"
                 }`}
               >
-                {complete ? <CheckIcon className="size-6" /> : idx + 1}
+                {complete ? <PenTick className="size-9" /> : idx + 1}
               </span>
               <div className="min-w-0 flex-1">
                 <h2 className="text-[23px] font-bold leading-tight tracking-tight">{section.title}</h2>
-                <p className="text-[16px] text-muted">{sDone} von {section.items.length} erledigt</p>
+                <p className="type text-[16px] text-muted">{sDone} von {section.items.length} erledigt</p>
               </div>
               <InfoButton kind="section" id={section.id} title={section.title} initial={initialInfo(section)} large />
               <svg
@@ -289,7 +289,7 @@ function ListMode({
                   const st = state[item.id];
                   const checked = Boolean(st?.checked);
                   return (
-                    <li key={item.id} className={`border-b border-line px-4 py-3 transition-colors last:border-b-0 ${checked ? "bg-ok/5" : ""}`}>
+                    <li key={item.id} className="border-b border-line px-4 py-3 transition-colors last:border-b-0">
                       <div className="flex items-center gap-3">
                         <button
                           type="button"
@@ -300,11 +300,11 @@ function ListMode({
                           className="flex min-h-16 min-w-0 flex-1 items-center gap-4 text-left"
                         >
                           <span
-                            className={`grid size-12 shrink-0 place-items-center rounded-full border-[3px] transition-all duration-200 ${
-                              checked ? "border-ok bg-ok text-white" : "border-muted/40 text-transparent"
+                            className={`relative grid size-12 shrink-0 place-items-center rounded-[6px] border-[2.5px] bg-card transition-all duration-200 ${
+                              checked ? "border-[var(--edge)]" : "border-[var(--edge)]/45"
                             }`}
                           >
-                            <CheckIcon className="size-7" />
+                            {checked && <PenTick className="pen-in size-[60px]" />}
                           </span>
                           <span className={`text-[20px] font-medium leading-snug ${checked ? "text-muted" : ""}`}>{item.title}</span>
                         </button>
@@ -324,7 +324,7 @@ function ListMode({
                         <button
                           type="button"
                           onClick={() => setCommentFor(item)}
-                          className="mb-1 ml-16 mt-1 block w-[calc(100%-4rem)] rounded-2xl bg-chip px-4 py-3 text-left text-[17px] text-ink/85"
+                          className="hand pen mb-1 ml-16 mt-0.5 block w-[calc(100%-4rem)] whitespace-pre-line border-l-2 border-[var(--rule)] pl-3 text-left text-[24px] leading-[1.15]"
                         >
                           {st.comment}
                         </button>
@@ -474,7 +474,7 @@ function InterviewMode({
           {sectionIndex + 1}. {section.title}
         </span>
         <InfoButton kind="section" id={section.id} title={section.title} initial={initialInfo(section)} large />
-        <span className="ml-auto whitespace-nowrap">Punkt {idx + 1} von {flat.length}</span>
+        <span className="type ml-auto whitespace-nowrap">Punkt {idx + 1} von {flat.length}</span>
       </div>
 
       <article className="card mt-3 overflow-hidden">
@@ -482,13 +482,13 @@ function InterviewMode({
           <div className="flex items-start gap-3">
             <h2 className="flex-1 text-[30px] font-bold leading-[1.15] tracking-tight md:text-[38px]">{item.title}</h2>
             {checked && (
-              <span className="mt-1 inline-flex shrink-0 items-center gap-1.5 rounded-full bg-ok px-3 py-1.5 text-[15px] font-semibold text-white">
+              <span className="mt-1 inline-flex shrink-0 rotate-[-6deg] items-center gap-1.5 rounded-[6px] border-[3px] border-ok px-3 py-1 text-[16px] font-black uppercase tracking-[0.12em] text-ok">
                 <CheckIcon className="size-4" /> Erledigt
               </span>
             )}
           </div>
 
-          <div className="mt-5 rounded-2xl bg-chip p-5">
+          <div className="note mt-5 rounded-[4px] p-5">
             <p className="flex items-center gap-2 text-[14px] font-semibold uppercase tracking-wide text-muted">
               Erklärung
               {info && info !== "loading" && info.source === "ai" && (
@@ -564,6 +564,15 @@ function ProgressRing({ pct }: { pct: number }) {
       </svg>
       <span className="text-[17px] font-bold">{pct}%</span>
     </div>
+  );
+}
+
+/** Tick drawn with a pen; overflows its box a little like a real one. */
+function PenTick({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" className={`pointer-events-none absolute ${className ?? ""}`} fill="none" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M4.5 10.8c1.4 1.2 2.6 2.7 3.6 4.5C10.4 10.2 13.2 6.6 16.8 3.8" stroke="var(--pen)" strokeWidth="2.1" pathLength={1} />
+    </svg>
   );
 }
 
