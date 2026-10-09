@@ -128,7 +128,7 @@ export default function ReportReview({
 
   return (
     <main className="mx-auto max-w-3xl px-4 pb-24 pt-8 md:px-6 md:pt-12">
-      <button onClick={reopen} className="link text-[15px]">‹ Zurück zur Checkliste</button>
+      <button onClick={reopen} className="link inline-flex min-h-11 items-center text-[18px]">‹ Zurück zur Checkliste</button>
       <p className="eyebrow mt-6">Report</p>
       <h1 className="mt-1 text-[32px] font-semibold leading-tight tracking-tight md:text-[44px]">{snapshot.checklistName}</h1>
       <p className="mt-1 text-[15px] text-muted">{snapshot.userName}</p>
@@ -140,7 +140,7 @@ export default function ReportReview({
       {/* Summary */}
       <section className="card mt-6 p-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-[21px] font-semibold tracking-tight">Zusammenfassung</h2>
+          <h2 className="text-[24px] font-bold tracking-tight">Zusammenfassung</h2>
           {!summaryLoading && generated && (summaryEdited ? <ManualBadge>manuell geändert</ManualBadge> : <AutoBadge>{generated.source === "ai" ? "KI-Vorschlag" : "automatisch erstellt"}</AutoBadge>)}
           {!summaryLoading && !generated && summary && <ManualBadge />}
         </div>
@@ -151,7 +151,7 @@ export default function ReportReview({
         ) : (
           <>
             <textarea
-              className="input mt-4 min-h-40 leading-relaxed"
+              className="input mt-4 min-h-40 text-[18px] leading-relaxed"
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
               placeholder="Kurze Zusammenfassung des Ergebnisses"
@@ -168,14 +168,14 @@ export default function ReportReview({
 
       {/* Results */}
       <section className="card mt-6 p-6">
-        <h2 className="mb-4 text-[21px] font-semibold tracking-tight">Ergebnis</h2>
+        <h2 className="mb-4 text-[24px] font-bold tracking-tight">Ergebnis</h2>
         <ResultList snapshot={snapshot} />
       </section>
 
       {/* Location */}
       <section className="card mt-6 p-6">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-[21px] font-semibold tracking-tight">Ort</h2>
+          <h2 className="text-[24px] font-bold tracking-tight">Ort</h2>
           <AutoBadge>automatisch ermittelt</AutoBadge>
         </div>
         {loc.state === "locating" && (
@@ -197,8 +197,8 @@ export default function ReportReview({
                 </div>
               </div>
             </div>
-            <label className="mt-4 flex cursor-pointer items-center gap-3 text-[15px]">
-              <input type="checkbox" className="size-5 accent-[var(--accent)]" checked={locConfirmed} onChange={(e) => setLocConfirmed(e.target.checked)} />
+            <label className="mt-4 flex min-h-12 cursor-pointer items-center gap-3 text-[18px]">
+              <input type="checkbox" className="size-7 accent-[var(--accent)]" checked={locConfirmed} onChange={(e) => setLocConfirmed(e.target.checked)} />
               Ich bestätige diesen Ort.
             </label>
             <p className="mt-1 text-[12px] text-muted">Der Ort wird automatisch ermittelt und kann nicht geändert werden.</p>
@@ -215,7 +215,7 @@ export default function ReportReview({
 
       {/* Signature */}
       <section className="card mt-6 p-6">
-        <h2 className="text-[21px] font-semibold tracking-tight">Unterschrift</h2>
+        <h2 className="text-[24px] font-bold tracking-tight">Unterschrift</h2>
         <p className="mt-1 text-[14px] text-muted">
           {signerName} · {formatDateTime(now)} {loc.state === "found" && loc.label ? `· ${loc.label}` : ""}
         </p>
@@ -231,7 +231,7 @@ export default function ReportReview({
       {error && <p className="mt-4 text-center text-danger">{error}</p>}
 
       <div className="mt-8 flex flex-col items-center gap-3">
-        <button className="btn-primary w-full max-w-sm text-[17px]" disabled={!ready || submitting} onClick={submit}>
+        <button className="btn-primary min-h-16 w-full max-w-md text-[20px]" disabled={!ready || submitting} onClick={submit}>
           {submitting ? "Wird gespeichert …" : "Unterschreiben & Report speichern"}
         </button>
         {!ready && !summaryLoading && canSign && (

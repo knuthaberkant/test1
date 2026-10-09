@@ -5,7 +5,7 @@ import { checklistsForUser } from "@/lib/data";
 /** Starts a run, or returns the user's open run of that checklist so it can be resumed. */
 export const POST = handle(async (request: Request) => {
   const user = await apiUser();
-  const { checklistId } = (await request.json()) as { checklistId?: number };
+  const checklistId = Number(((await request.json()) as { checklistId?: number }).checklistId);
   if (!checklistsForUser(user).some((c) => c.id === checklistId))
     throw new HttpError(403, "Diese Checkliste ist für dich nicht freigegeben");
   const db = getDb();
