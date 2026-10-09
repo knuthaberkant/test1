@@ -148,6 +148,18 @@ body {
   animation: sheet-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Paper log look of the printed report (components/PrintReport.tsx). */
+@utility type {
+  font-family: "Courier Prime", "Courier New", Courier, ui-monospace, monospace;
+  letter-spacing: -0.01em;
+}
+@utility hand {
+  font-family: "Caveat", "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive;
+}
+@utility bg-paper {
+  background-color: #fffdf6;
+}
+
 @page {
   size: A4;
   margin: 12mm 12mm 14mm;
@@ -206,7 +218,8 @@ body {
   .print-keep-with-next {
     break-after: avoid;
   }
-  .print-avoid {
+  .print-avoid,
+  .print-report tr {
     break-inside: avoid;
   }
 }
