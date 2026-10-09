@@ -11,8 +11,13 @@ export default function SignaturePad({ onChange }: { onChange: (dataUrl: string 
 
   useEffect(() => {
     const canvas = canvasRef.current!;
+    let width = -1;
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
+      // Mobile browsers fire resize when the address bar shows or hides; only a real width change
+      // needs a new canvas (which clears it), otherwise the signature would vanish while scrolling.
+      if (rect.width === width) return;
+      width = rect.width;
       const ratio = window.devicePixelRatio || 1;
       canvas.width = rect.width * ratio;
       canvas.height = rect.height * ratio;

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import PrintButton from "@/components/PrintButton";
-import { AutoBadge, ManualBadge, ResultList, sourceBadge, TimeFacts } from "@/components/ReportBody";
+import PrintReport from "@/components/PrintReport";
+import { CompletionDonut, BarList, ProgressTimeline, StatTile } from "@/components/Charts";
+import { AutoBadge, ManualBadge, ResultList, sourceBadge } from "@/components/ReportBody";
 import { requireUser } from "@/lib/auth";
 import { canAccessRun, formatDateTime, formatDuration, getRun, snapshotFor, SOURCE_LABELS } from "@/lib/data";
 
@@ -57,8 +59,16 @@ export default async function ReportPage({
     })),
   ];
 
+  const open = items.length - done;
+  const pct = items.length ? Math.round((done / items.length) * 100) : 0;
+  const commentCount = items.filter((i) => i.comment).length;
+  const openItems = snap.sections.flatMap((s) => s.items.filter((i) => !i.checked).map((i) => ({ ...i, section: s.title })));
+  const checkTimes = items.map((i) => i.checkedAt).filter((t): t is string => Boolean(t));
+
   return (
-    <main className="mx-auto max-w-3xl px-4 pb-24 pt-8 md:px-6 md:pt-12">
+    <main className="report mx-auto max-w-5xl px-4 pb-24 pt-8 md:px-6 md:pt-12">
+      <PrintReport run={run} snap={snap} provenance={provenance} />
+      <div className="print:hidden">
       {isNew && (
         <div className="no-print card mb-6 flex items-center gap-3 p-4 text-[15px]">
           <span className="grid size-8 place-items-center rounded-full bg-ok text-white">✓</span>
@@ -67,45 +77,108 @@ export default async function ReportPage({
       )}
       <div className="no-print flex items-center justify-between gap-3">
         <Link href={user.role === "admin" ? "/admin/reports" : "/app"} className="link text-[15px]">
-          ‹ {user.role === "admin" ? "Alle Reports" : "Übersicht"}
+          ‹ {user.role === "admin" ? "Dashboard" : "Übersicht"}
         </Link>
         <PrintButton />
       </div>
 
-      <p className="eyebrow mt-6">Report Nr. {run.id}</p>
-      <h1 className="mt-1 text-[32px] font-semibold leading-tight tracking-tight md:text-[44px]">{snap.checklistName}</h1>
-      <p className="mt-1 text-[15px] text-muted">
-        {snap.userName} · {snap.userEmail} · {done} von {items.length} Punkten erledigt
-      </p>
+      {/* Header */}
+      <header className="mt-6 flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
+        <div>
+          <p className="eyebrow">Prüfbericht Nr. {run.id}</p>
+          <h1 className="mt-1 text-[34px] font-bold leading-tight tracking-tight md:text-[48px]">{snap.checklistName}</h1>
+          <p className="mt-1 text-[16px] text-muted">
+            {snap.userName} · {formatDateTime(run.signed_at)}
+            {run.location_label ? ` · ${run.location_label}` : ""}
+          </p>
+        </div>
+        <span
+          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[15px] font-semibold ${
+            open === 0 ? "bg-ok/15 text-ok" : "bg-danger/10 text-danger"
+          }`}
+        >
+          {open === 0 ? "✓ Vollständig erledigt" : `! ${open} Punkt${open === 1 ? "" : "e"} offen`}
+        </span>
+      </header>
 
-      <div className="mt-6">
-        <TimeFacts snapshot={snap} durationText={formatDuration(snap.durationMs)} />
+      {/* KPIs */}
+      <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <StatTile label="Erfüllung" value={`${pct}%`} sub={`${done} von ${items.length} Punkten`} tone={open === 0 ? "good" : undefined} />
+        <StatTile label="Offene Punkte" value={open} tone={open ? "bad" : "good"} sub={open ? "siehe Liste unten" : "keine"} />
+        <StatTile label="Dauer" value={formatDuration(snap.durationMs)} sub={`${formatDateTime(snap.startedAt)} – ${formatDateTime(snap.completedAt).split(", ").pop()}`} />
+        <StatTile label="Kommentare" value={commentCount} sub={`zu ${commentCount} von ${items.length} Punkten`} />
       </div>
 
-      <section className="card mt-6 p-6">
+      {/* Charts */}
+      <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <section className="card break-inside-avoid p-6">
+          <h2 className="mb-4 text-[19px] font-semibold tracking-tight">Ergebnis</h2>
+          <CompletionDonut done={done} open={open} size={160} />
+        </section>
+        <section className="card break-inside-avoid p-6">
+          <h2 className="mb-4 text-[19px] font-semibold tracking-tight">Erfüllung je Abschnitt</h2>
+          <BarList
+            max={100}
+            format={(v) => `${v}%`}
+            rows={snap.sections.map((s) => {
+              const d = s.items.filter((i) => i.checked).length;
+              const v = s.items.length ? Math.round((d / s.items.length) * 100) : 0;
+              return { label: s.title, value: v, hint: `${d} von ${s.items.length} erledigt`, tone: v === 100 ? "good" : undefined };
+            })}
+          />
+        </section>
+      </div>
+
+      {checkTimes.length > 0 && (
+        <section className="card mt-3 break-inside-avoid p-6">
+          <h2 className="mb-1 text-[19px] font-semibold tracking-tight">Zeitverlauf</h2>
+          <p className="mb-3 text-[13px] text-muted">Abgehakte Punkte über die Bearbeitungszeit</p>
+          <ProgressTimeline start={snap.startedAt} end={snap.completedAt} times={checkTimes} total={items.length} />
+        </section>
+      )}
+
+      <section className="card mt-3 break-inside-avoid p-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-[21px] font-semibold tracking-tight">Zusammenfassung</h2>
+          <h2 className="text-[19px] font-semibold tracking-tight">Zusammenfassung</h2>
           {sourceBadge(run.summary_source)}
         </div>
         <p className="mt-3 whitespace-pre-line text-[17px] leading-relaxed">{run.summary}</p>
         {run.summary_original && run.summary_original !== run.summary && (
-          <details className="mt-3 text-[14px]">
+          <details className="no-print mt-3 text-[14px]">
             <summary className="cursor-pointer text-link">Ursprünglicher Vorschlag</summary>
             <p className="mt-2 whitespace-pre-line text-muted">{run.summary_original}</p>
           </details>
         )}
       </section>
 
-      <section className="card mt-6 p-6">
-        <h2 className="mb-4 text-[21px] font-semibold tracking-tight">Ergebnis</h2>
+      {openItems.length > 0 && (
+        <section className="card mt-3 break-inside-avoid border-l-4 border-danger p-6">
+          <h2 className="text-[19px] font-semibold tracking-tight">Offene Punkte</h2>
+          <ul className="mt-3 space-y-2">
+            {openItems.map((i, k) => (
+              <li key={k} className="flex gap-3 text-[15px]">
+                <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-[var(--viz-bad)] text-[11px] font-bold text-white">!</span>
+                <span>
+                  {i.title} <span className="text-muted">· {i.section}</span>
+                  {i.comment && <span className="block text-[14px] text-muted">„{i.comment}“</span>}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="card mt-3 p-6">
+        <h2 className="mb-4 text-[19px] font-semibold tracking-tight">Alle Punkte im Detail</h2>
         <ResultList snapshot={snap} />
       </section>
 
-      <section className="card mt-6 p-6">
-        <h2 className="text-[21px] font-semibold tracking-tight">Unterschrift</h2>
+      <div className="mt-3 grid gap-3 md:grid-cols-2">
+      <section className="card break-inside-avoid p-6">
+        <h2 className="text-[19px] font-semibold tracking-tight">Unterschrift</h2>
         {run.signature && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={run.signature} alt={`Unterschrift ${run.signer_name}`} className="mt-4 h-36 w-full max-w-md rounded-2xl border border-line bg-white object-contain" />
+          <img src={run.signature} alt={`Unterschrift ${run.signer_name}`} className="mt-4 h-32 w-full rounded-2xl border border-line bg-white object-contain" />
         )}
         <dl className="mt-4 grid gap-x-6 gap-y-2 text-[15px] sm:grid-cols-[auto_1fr]">
           <dt className="text-muted">Name</dt>
@@ -126,19 +199,23 @@ export default async function ReportPage({
         </dl>
       </section>
 
-      <section className="card mt-6 p-6">
-        <h2 className="text-[21px] font-semibold tracking-tight">Herkunft der Angaben</h2>
-        <p className="mt-1 text-[14px] text-muted">Welche Angaben automatisch erkannt und welche manuell eingegeben oder geändert wurden.</p>
-        <ul className="mt-4 divide-y divide-line">
+      <section className="card break-inside-avoid p-6">
+        <h2 className="text-[19px] font-semibold tracking-tight">Herkunft der Angaben</h2>
+        <p className="mt-1 text-[13px] text-muted">Automatisch ermittelt oder manuell eingegeben bzw. geändert.</p>
+        <ul className="mt-3 divide-y divide-line">
           {provenance.map((p) => (
-            <li key={p.field} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:gap-4">
-              <div className="w-48 shrink-0 font-medium">{p.field}</div>
-              <div className="flex-1 text-[14px] text-muted">{p.how}</div>
-              <div>{p.auto ? <AutoBadge /> : <ManualBadge />}</div>
+            <li key={p.field} className="flex items-start gap-3 py-2.5">
+              <div className="min-w-0 flex-1">
+                <div className="text-[14px] font-medium">{p.field}</div>
+                <div className="text-[12px] text-muted">{p.how}</div>
+              </div>
+              <div className="shrink-0">{p.auto ? <AutoBadge /> : <ManualBadge />}</div>
             </li>
           ))}
         </ul>
       </section>
+      </div>
+      </div>
     </main>
   );
 }
