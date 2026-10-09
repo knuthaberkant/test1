@@ -59,7 +59,7 @@ export function CompletionDonut({ done, open, size = 180 }: { done: number; open
             <title>{`Erledigt: ${done}`}</title>
           </circle>
         )}
-        <text x="90" y="88" textAnchor="middle" fontSize="40" fontWeight="700" fill="var(--ink)">{pct}%</text>
+        <text x="90" y="88" textAnchor="middle" fontSize={pct === 100 ? 34 : 40} fontWeight="700" fill="var(--ink)">{pct}%</text>
         <text x="90" y="114" textAnchor="middle" fontSize="15" fill="var(--muted)">erledigt</text>
       </svg>
       <ul className="space-y-3 text-[15px]">
@@ -172,14 +172,16 @@ export function ProgressTimeline({
   end,
   times,
   total,
+  height = 170,
 }: {
   start: string;
   end: string;
   times: string[];
   total: number;
+  height?: number;
 }) {
   const W = 640;
-  const H = 170;
+  const H = height;
   const padL = 28;
   const padB = 24;
   const t0 = new Date(start).getTime();

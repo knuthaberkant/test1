@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import PrintButton from "@/components/PrintButton";
+import PrintReport from "@/components/PrintReport";
 import { CompletionDonut, BarList, ProgressTimeline, StatTile } from "@/components/Charts";
 import { AutoBadge, ManualBadge, ResultList, sourceBadge } from "@/components/ReportBody";
 import { requireUser } from "@/lib/auth";
@@ -66,6 +67,8 @@ export default async function ReportPage({
 
   return (
     <main className="report mx-auto max-w-5xl px-4 pb-24 pt-8 md:px-6 md:pt-12">
+      <PrintReport run={run} snap={snap} provenance={provenance} />
+      <div className="print:hidden">
       {isNew && (
         <div className="no-print card mb-6 flex items-center gap-3 p-4 text-[15px]">
           <span className="grid size-8 place-items-center rounded-full bg-ok text-white">✓</span>
@@ -211,6 +214,7 @@ export default async function ReportPage({
           ))}
         </ul>
       </section>
+      </div>
       </div>
     </main>
   );

@@ -150,7 +150,7 @@ body {
 
 @page {
   size: A4;
-  margin: 12mm;
+  margin: 12mm 12mm 14mm;
 }
 
 @media print {
@@ -193,6 +193,20 @@ body {
   }
   .break-inside-avoid,
   .report li {
+    break-inside: avoid;
+  }
+  /* Exactly one sheet: A4 height minus the @page margins (12mm top, 14mm bottom). */
+  .print-page-1 {
+    display: flex;
+    flex-direction: column;
+    height: 270mm;
+    overflow: hidden;
+    break-after: page;
+  }
+  .print-keep-with-next {
+    break-after: avoid;
+  }
+  .print-avoid {
     break-inside: avoid;
   }
 }
